@@ -14,10 +14,10 @@ from collections import deque
 
 #节点
 class TreeNode(object):
-    def __init__(self, value):
-        self.val = value
-        self.left = None
-        self.right = None
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
    
 #二叉树，用于使用List生成二叉树
 class GenerateBinaryTreeByList(object):    
@@ -32,29 +32,51 @@ class GenerateBinaryTreeByList(object):
         #根节点先放入queue
         self.tree_root = TreeNode(tree_list[0])
         father_queue = deque([self.tree_root])
+        
+        #获取子节点queue，他是下一轮处理的父节点queue
+        child_queue = deque()
+        
         #算出节点数量，用于后续计算
         tree_list_length = len(tree_list)
-        #处理节点从第2个元素开始
-        i = 1
-        while i < tree_list_length:
+        
+        #计算总的节点数
+        total_node_counter = 0
+        #子节点下表标识
+        child_index = len(father_queue)
+        total_node_counter = child_index
+        
+        #逐层构建二叉树
+        while child_index < tree_list_length:
+            #节点逐层处理，如果上层已经处理，这向下层递归
+            if len(father_queue) < 1:
+                #子层节点，变为父节点，子节点重新计算
+                father_queue = child_queue
+                child_queue = deque()
+                #重新调整下一层节点子节点的开始位置
+                total_node_counter += len(father_queue)
+                child_index = total_node_counter 
+                
             #父节点取出
-            node = father_queue.popleft()
+            node = father_queue.popleft() 
+            #空节点则直接跳过
+            if not node:
+                continue
+              
             #先处理左子节点
-            node.left = TreeNode(tree_list[i]) if tree_list[i] else None
-            #如果节点不为空，则放入队列，用于其子节点的计算
-            if node.left:
-                father_queue.append(node.left)
+            node.left = TreeNode(tree_list[child_index]) if tree_list[child_index] else None            
+            #放入队列，用于其子节点的计算
+            child_queue.append(node.left) 
+                        
                 
             #右节点处理
-            i = i + 1
-            if i >= tree_list_length:
+            child_index = child_index + 1
+            if child_index >= tree_list_length:
                 break
-            node.right = TreeNode(tree_list[i]) if tree_list[i] else None
-            if node.right:
-                father_queue.append(node.left)
+            node.right = TreeNode(tree_list[child_index]) if tree_list[child_index] else None
+            child_queue.append(node.right)
                 
             #下一个节点处理
-            i = i + 1
+            child_index = child_index + 1
 
 #标志常数
 HAVE_LOCATOR = 1
